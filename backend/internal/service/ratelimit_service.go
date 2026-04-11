@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/Wei-Shaw/sub2api/internal/config"
+	"github.com/Wei-Shaw/sub2api/internal/pkg/apistation"
 	"github.com/Wei-Shaw/sub2api/internal/pkg/logger"
 	"github.com/tidwall/gjson"
 )
@@ -643,6 +644,8 @@ func (s *RateLimitService) handleAuthError(ctx context.Context, account *Account
 		return
 	}
 	slog.Warn("account_disabled_auth_error", "account_id", account.ID, "error", errorMsg)
+	evt := apistation.NewAccountStateEvent(account.ID, "active", "error", "auth", errorMsg, "")
+	slog.Info("account_state_change", "event", apistation.AccountStateEventToJSON(evt))
 }
 
 // handle403 处理 403 Forbidden 错误
@@ -723,6 +726,8 @@ func (s *RateLimitService) handle429(ctx context.Context, account *Account, head
 				return
 			}
 			slog.Info("openai_account_rate_limited", "account_id", account.ID, "reset_at", *resetAt)
+			evt := apistation.NewAccountStateEvent(account.ID, "active", "rate_limited", "429", "openai_header", "")
+			slog.Info("account_state_change", "event", apistation.AccountStateEventToJSON(evt))
 			return
 		}
 	}
@@ -745,6 +750,8 @@ func (s *RateLimitService) handle429(ctx context.Context, account *Account, head
 		}
 
 		slog.Info("anthropic_account_rate_limited", "account_id", account.ID, "reset_at", result.resetAt, "reset_in", time.Until(result.resetAt).Truncate(time.Second))
+		evt := apistation.NewAccountStateEvent(account.ID, "active", "rate_limited", "429", "anthropic_per_window", "")
+		slog.Info("account_state_change", "event", apistation.AccountStateEventToJSON(evt))
 		return
 	}
 
@@ -763,6 +770,8 @@ func (s *RateLimitService) handle429(ctx context.Context, account *Account, head
 					return
 				}
 				slog.Info("account_rate_limited", "account_id", account.ID, "platform", account.Platform, "reset_at", resetTime, "reset_in", time.Until(resetTime).Truncate(time.Second))
+				evt := apistation.NewAccountStateEvent(account.ID, "active", "rate_limited", "429", "openai_body", "")
+				slog.Info("account_state_change", "event", apistation.AccountStateEventToJSON(evt))
 				return
 			}
 		case PlatformGemini, PlatformAntigravity:
@@ -774,6 +783,8 @@ func (s *RateLimitService) handle429(ctx context.Context, account *Account, head
 					return
 				}
 				slog.Info("account_rate_limited", "account_id", account.ID, "platform", account.Platform, "reset_at", resetTime, "reset_in", time.Until(resetTime).Truncate(time.Second))
+				evt := apistation.NewAccountStateEvent(account.ID, "active", "rate_limited", "429", "gemini_body", "")
+				slog.Info("account_state_change", "event", apistation.AccountStateEventToJSON(evt))
 				return
 			}
 		}
@@ -788,12 +799,20 @@ func (s *RateLimitService) handle429(ctx context.Context, account *Account, head
 			return
 		}
 
-		// 其他平台：没有重置时间，使用默认5分钟
-		resetAt := time.Now().Add(5 * time.Minute)
-		slog.Warn("rate_limit_no_reset_time", "account_id", account.ID, "platform", account.Platform, "using_default", "5m")
+		// api-station: 其他平台没有重置时间，使用分级退避
+		var cdJSON string
+		if s.settingService != nil {
+			cdJSON = s.settingService.GetCooldownConfigJSON(ctx)
+		}
+		cd := apistation.ComputeCooldown(apistation.FailureRateLimit, 1, apistation.ParseCooldownConfig(cdJSON))
+		resetAt := time.Now().Add(cd)
+		slog.Warn("rate_limit_no_reset_time", "account_id", account.ID, "platform", account.Platform, "cooldown", cd)
 		if err := s.accountRepo.SetRateLimited(ctx, account.ID, resetAt); err != nil {
 			slog.Warn("rate_limit_set_failed", "account_id", account.ID, "error", err)
+			return
 		}
+		evt := apistation.NewAccountStateEvent(account.ID, "active", "rate_limited", "429", "no_reset_time", "")
+		slog.Info("account_state_change", "event", apistation.AccountStateEventToJSON(evt))
 		return
 	}
 
@@ -801,9 +820,18 @@ func (s *RateLimitService) handle429(ctx context.Context, account *Account, head
 	ts, err := strconv.ParseInt(resetTimestamp, 10, 64)
 	if err != nil {
 		slog.Warn("rate_limit_reset_parse_failed", "reset_timestamp", resetTimestamp, "error", err)
-		resetAt := time.Now().Add(5 * time.Minute)
+		// api-station: 解析失败时使用分级退避
+		var cdJSON string
+		if s.settingService != nil {
+			cdJSON = s.settingService.GetCooldownConfigJSON(ctx)
+		}
+		cd := apistation.ComputeCooldown(apistation.FailureRateLimit, 1, apistation.ParseCooldownConfig(cdJSON))
+		resetAt := time.Now().Add(cd)
 		if err := s.accountRepo.SetRateLimited(ctx, account.ID, resetAt); err != nil {
 			slog.Warn("rate_limit_set_failed", "account_id", account.ID, "error", err)
+		} else {
+			evt := apistation.NewAccountStateEvent(account.ID, "active", "rate_limited", "429", "reset_parse_failed", "")
+			slog.Info("account_state_change", "event", apistation.AccountStateEventToJSON(evt))
 		}
 		return
 	}
@@ -824,6 +852,8 @@ func (s *RateLimitService) handle429(ctx context.Context, account *Account, head
 	}
 
 	slog.Info("account_rate_limited", "account_id", account.ID, "reset_at", resetAt)
+	evt := apistation.NewAccountStateEvent(account.ID, "active", "rate_limited", "429", "unified_reset", "")
+	slog.Info("account_state_change", "event", apistation.AccountStateEventToJSON(evt))
 }
 
 // calculateOpenAI429ResetTime 从 OpenAI 429 响应头计算正确的重置时间
@@ -1089,6 +1119,8 @@ func (s *RateLimitService) handle529(ctx context.Context, account *Account) {
 	}
 
 	slog.Info("account_overloaded", "account_id", account.ID, "until", until)
+	evt := apistation.NewAccountStateEvent(account.ID, "active", "overloaded", "529", "server_overload", "")
+	slog.Info("account_state_change", "event", apistation.AccountStateEventToJSON(evt))
 }
 
 // UpdateSessionWindow 从成功响应更新5h窗口状态

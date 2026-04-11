@@ -2164,6 +2164,15 @@ func (s *SettingService) GetSensitiveWordsConfig(ctx context.Context) (enabled b
 	return true, customWords
 }
 
+// GetCooldownConfigJSON 返回分级退避配置的原始 JSON 字符串
+func (s *SettingService) GetCooldownConfigJSON(ctx context.Context) string {
+	value, err := s.settingRepo.GetValue(ctx, SettingKeyCooldownConfig)
+	if err != nil {
+		return ""
+	}
+	return value
+}
+
 // GetSessionTTLRange 获取会话ID伪装的 TTL 范围（分钟）
 // 默认: min=30, max=300
 func (s *SettingService) GetSessionTTLRange(ctx context.Context) (minMinutes, maxMinutes int) {

@@ -256,6 +256,9 @@ const (
 
 	// api-station: Cooldown configuration
 	SettingKeyCooldownConfig = "apistation_cooldown_config" // 分级退避配置 JSON
+
+	// api-station: Request audit
+	SettingKeyAuditRetentionDays = "apistation_audit_retention_days" // 审计日志保留天数（默认 7）
 )
 
 // AdminAPIKeyPrefix is the prefix for admin API keys (distinct from user "sk-" keys).

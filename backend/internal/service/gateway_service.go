@@ -23,6 +23,7 @@ import (
 	"time"
 
 	"github.com/Wei-Shaw/sub2api/internal/config"
+	"github.com/Wei-Shaw/sub2api/internal/pkg/apistation"
 	"github.com/Wei-Shaw/sub2api/internal/pkg/claude"
 	"github.com/Wei-Shaw/sub2api/internal/pkg/ctxkey"
 	"github.com/Wei-Shaw/sub2api/internal/pkg/logger"
@@ -4469,6 +4470,9 @@ func (s *GatewayService) Forward(ctx context.Context, c *gin.Context, account *A
 
 	// 处理正常响应
 
+	// api-station: request audit
+	s.emitAuditLog(resp, account.ID, reqModel, time.Since(startTime).Milliseconds())
+
 	// 触发上游接受回调（提前释放串行锁，不等流完成）
 	if parsed.OnUpstreamAccepted != nil {
 		parsed.OnUpstreamAccepted()
@@ -8874,4 +8878,20 @@ func (s *GatewayService) debugLogGatewaySnapshot(tag string, headers http.Header
 
 	// 写入文件（调试用，并发写入可能交错但不影响可读性）
 	_, _ = f.WriteString(buf.String())
+}
+
+// emitAuditLog 写入请求审计记录到 ops_system_logs（component=request_audit）
+func (s *GatewayService) emitAuditLog(resp *http.Response, accountID int64, model string, durationMs int64) {
+	record := apistation.CaptureAuditRecord(nil, resp, accountID, model, resp.Header.Get("x-request-id"), durationMs, "")
+	if record.RequestID == "" {
+		return
+	}
+	logger.WriteSinkEvent("info", "request_audit", "request_audit", map[string]any{
+		"component":   "request_audit",
+		"account_id":  record.AccountID,
+		"model":       record.Model,
+		"status_code": record.StatusCode,
+		"duration_ms": record.DurationMs,
+		"extra":       apistation.AuditRecordToJSON(record),
+	})
 }

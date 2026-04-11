@@ -9,6 +9,7 @@ import (
 
 // ProvideAdminHandlers creates the AdminHandlers struct
 func ProvideAdminHandlers(
+	apistationAuditHandler *admin.ApistationAuditHandler,
 	dashboardHandler *admin.DashboardHandler,
 	userHandler *admin.UserHandler,
 	groupHandler *admin.GroupHandler,
@@ -37,6 +38,7 @@ func ProvideAdminHandlers(
 	paymentHandler *admin.PaymentHandler,
 ) *AdminHandlers {
 	return &AdminHandlers{
+		ApistationAudit:       apistationAuditHandler,
 		Dashboard:             dashboardHandler,
 		User:                  userHandler,
 		Group:                 groupHandler,
@@ -131,6 +133,7 @@ var ProviderSet = wire.NewSet(
 	NewPaymentWebhookHandler,
 
 	// Admin handlers
+	admin.NewApistationAuditHandler,
 	admin.NewDashboardHandler,
 	admin.NewUserHandler,
 	admin.NewGroupHandler,

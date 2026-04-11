@@ -6,6 +6,7 @@ import (
 
 // AdminHandlers contains all admin-related HTTP handlers
 type AdminHandlers struct {
+	ApistationAudit       *admin.ApistationAuditHandler
 	Dashboard             *admin.DashboardHandler
 	User                  *admin.UserHandler
 	Group                 *admin.GroupHandler

@@ -88,6 +88,17 @@ func RegisterAdminRoutes(
 
 		// 渠道管理
 		registerChannelRoutes(admin, h)
+
+		// api-station: 审计日志
+		registerApistationAuditRoutes(admin, h)
+	}
+}
+
+func registerApistationAuditRoutes(admin *gin.RouterGroup, h *handler.Handlers) {
+	audit := admin.Group("/audit")
+	{
+		audit.GET("/account/:id", h.Admin.ApistationAudit.GetAccountAudit)
+		audit.GET("/recent-errors", h.Admin.ApistationAudit.GetRecentErrors)
 	}
 }
 

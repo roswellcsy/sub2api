@@ -253,6 +253,9 @@ const (
 	// api-station: Fingerprint configuration
 	SettingKeyFingerprintSalt = "apistation_fingerprint_salt" // 指纹盐值（默认 59cf53e54c78）
 	SettingKeyCLIVersion      = "apistation_cli_version"     // Claude CLI 版本号
+
+	// api-station: Cooldown configuration
+	SettingKeyCooldownConfig = "apistation_cooldown_config" // 分级退避配置 JSON
 )
 
 // AdminAPIKeyPrefix is the prefix for admin API keys (distinct from user "sk-" keys).

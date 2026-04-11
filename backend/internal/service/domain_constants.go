@@ -249,6 +249,10 @@ const (
 	SettingKeyEnableMetadataPassthrough = "enable_metadata_passthrough"
 	// SettingKeyEnableCCHSigning 是否对 billing header 中的 cch 进行 xxHash64 签名（默认 false）
 	SettingKeyEnableCCHSigning = "enable_cch_signing"
+
+	// api-station: Fingerprint configuration
+	SettingKeyFingerprintSalt = "apistation_fingerprint_salt" // 指纹盐值（默认 59cf53e54c78）
+	SettingKeyCLIVersion      = "apistation_cli_version"     // Claude CLI 版本号
 )
 
 // AdminAPIKeyPrefix is the prefix for admin API keys (distinct from user "sk-" keys).

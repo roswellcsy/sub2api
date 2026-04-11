@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/Wei-Shaw/sub2api/internal/pkg/apicompat"
+	"github.com/Wei-Shaw/sub2api/internal/pkg/apistation"
 	"github.com/Wei-Shaw/sub2api/internal/pkg/claude"
 	"github.com/Wei-Shaw/sub2api/internal/pkg/logger"
 	"github.com/Wei-Shaw/sub2api/internal/util/responseheaders"
@@ -93,16 +94,27 @@ func (s *GatewayService) ForwardAsResponses(
 		}
 	}
 
-	// 7. Enforce cache_control block limit
+	// 7. api-station: 敏感词零宽字符混淆
+	if s.settingService != nil {
+		if enabled, customWords := s.settingService.GetSensitiveWordsConfig(ctx); enabled {
+			words := customWords
+			if len(words) == 0 {
+				words = apistation.DefaultSensitiveWords
+			}
+			anthropicBody = apistation.ObfuscateBody(anthropicBody, words)
+		}
+	}
+
+	// 8. Enforce cache_control block limit
 	anthropicBody = enforceCacheControlLimit(anthropicBody)
 
-	// 8. Get access token
+	// 9. Get access token
 	token, tokenType, err := s.GetAccessToken(ctx, account)
 	if err != nil {
 		return nil, fmt.Errorf("get access token: %w", err)
 	}
 
-	// 9. Get proxy URL
+	// 10. Get proxy URL
 	proxyURL := ""
 	if account.ProxyID != nil && account.Proxy != nil {
 		proxyURL = account.Proxy.URL()

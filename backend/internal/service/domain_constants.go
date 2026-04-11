@@ -272,6 +272,10 @@ const (
 	SettingKeyBetaHeaderOAuthHaiku  = "apistation_beta_header_oauth_haiku"  // OAuth Haiku 模型的 beta header（默认同 claude.HaikuBetaHeader）
 	SettingKeyBetaHeaderAPIKey      = "apistation_beta_header_apikey"       // API Key 非 Haiku 模型的 beta header（默认同 claude.APIKeyBetaHeader）
 	SettingKeyBetaHeaderAPIKeyHaiku = "apistation_beta_header_apikey_haiku" // API Key Haiku 模型的 beta header（默认同 claude.APIKeyHaikuBetaHeader）
+
+	// api-station: Sensitive word obfuscation
+	SettingKeySensitiveWordsEnabled = "apistation_sensitive_words_enabled" // 是否启用敏感词混淆（默认 false）
+	SettingKeySensitiveWordsList    = "apistation_sensitive_words_list"    // 自定义敏感词列表（JSON 数组，默认使用内置列表）
 )
 
 // AdminAPIKeyPrefix is the prefix for admin API keys (distinct from user "sk-" keys).

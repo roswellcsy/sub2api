@@ -2147,6 +2147,23 @@ func (s *SettingService) GetBetaHeaderOverrides(ctx context.Context) (oauth, oau
 		values[SettingKeyBetaHeaderAPIKeyHaiku]
 }
 
+// GetSensitiveWordsConfig 返回敏感词混淆配置
+func (s *SettingService) GetSensitiveWordsConfig(ctx context.Context) (enabled bool, words []string) {
+	enabledStr, err := s.settingRepo.GetValue(ctx, SettingKeySensitiveWordsEnabled)
+	if err != nil || enabledStr != "true" {
+		return false, nil
+	}
+	listStr, err := s.settingRepo.GetValue(ctx, SettingKeySensitiveWordsList)
+	if err != nil || listStr == "" {
+		return true, nil // enabled 但无自定义列表，调用方用默认列表
+	}
+	var customWords []string
+	if json.Unmarshal([]byte(listStr), &customWords) != nil {
+		return true, nil
+	}
+	return true, customWords
+}
+
 // GetSessionTTLRange 获取会话ID伪装的 TTL 范围（分钟）
 // 默认: min=30, max=300
 func (s *SettingService) GetSessionTTLRange(ctx context.Context) (minMinutes, maxMinutes int) {

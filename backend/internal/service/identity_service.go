@@ -54,21 +54,50 @@ type IdentityCache interface {
 	SetFingerprint(ctx context.Context, accountID int64, fp *Fingerprint) error
 	// GetMaskedSessionID 获取固定的会话ID（用于会话ID伪装功能）
 	// 返回的 sessionID 是一个 UUID 格式的字符串
-	// 如果不存在或已过期（15分钟无请求），返回空字符串
+	// 如果不存在或已过期，返回空字符串
 	GetMaskedSessionID(ctx context.Context, accountID int64) (string, error)
-	// SetMaskedSessionID 设置固定的会话ID，TTL 为 15 分钟
+	// SetMaskedSessionID 设置固定的会话ID，使用指定的 TTL
 	// 每次调用都会刷新 TTL
-	SetMaskedSessionID(ctx context.Context, accountID int64, sessionID string) error
+	SetMaskedSessionID(ctx context.Context, accountID int64, sessionID string, ttl time.Duration) error
 }
 
 // IdentityService 管理OAuth账号的请求身份指纹
 type IdentityService struct {
-	cache IdentityCache
+	cache          IdentityCache
+	settingService *SettingService
 }
 
 // NewIdentityService 创建新的IdentityService
-func NewIdentityService(cache IdentityCache) *IdentityService {
-	return &IdentityService{cache: cache}
+func NewIdentityService(cache IdentityCache, settingService *SettingService) *IdentityService {
+	return &IdentityService{cache: cache, settingService: settingService}
+}
+
+// getSessionTTL 从 SettingService 读取 TTL 范围并返回随机 TTL
+// 默认范围: 30-300 分钟
+func (s *IdentityService) getSessionTTL(ctx context.Context) time.Duration {
+	minMinutes, maxMinutes := 30, 300
+
+	if s.settingService != nil {
+		minMinutes, maxMinutes = s.settingService.GetSessionTTLRange(ctx)
+	}
+
+	if minMinutes > maxMinutes {
+		minMinutes = maxMinutes
+	}
+	if minMinutes == maxMinutes {
+		return time.Duration(minMinutes) * time.Minute
+	}
+
+	// crypto/rand 随机
+	rangeSize := maxMinutes - minMinutes + 1
+	b := make([]byte, 4)
+	rand.Read(b)
+	n := int(b[0])<<24 | int(b[1])<<16 | int(b[2])<<8 | int(b[3])
+	if n < 0 {
+		n = -n
+	}
+	ttlMinutes := minMinutes + (n % rangeSize)
+	return time.Duration(ttlMinutes) * time.Minute
 }
 
 // GetOrCreateFingerprint 获取或创建账号的指纹
@@ -314,8 +343,9 @@ func (s *IdentityService) RewriteUserIDWithMasking(ctx context.Context, body []b
 		logger.LegacyPrintf("service.identity", "Generated new masked session ID for account %d: %s", account.ID, maskedSessionID)
 	}
 
-	// 刷新 TTL（每次请求都刷新，保持 15 分钟有效期）
-	if err := s.cache.SetMaskedSessionID(ctx, account.ID, maskedSessionID); err != nil {
+	// 刷新 TTL（使用随机 TTL，范围从 SettingService 读取）
+	ttl := s.getSessionTTL(ctx)
+	if err := s.cache.SetMaskedSessionID(ctx, account.ID, maskedSessionID, ttl); err != nil {
 		logger.LegacyPrintf("service.identity", "Warning: failed to set masked session ID for account %d: %v", account.ID, err)
 	}
 

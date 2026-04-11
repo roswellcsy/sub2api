@@ -4,6 +4,7 @@ import (
 	"context"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 )
@@ -21,14 +22,14 @@ func (s *identityCacheStub) SetFingerprint(_ context.Context, _ int64, _ *Finger
 func (s *identityCacheStub) GetMaskedSessionID(_ context.Context, _ int64) (string, error) {
 	return s.maskedSessionID, nil
 }
-func (s *identityCacheStub) SetMaskedSessionID(_ context.Context, _ int64, sessionID string) error {
+func (s *identityCacheStub) SetMaskedSessionID(_ context.Context, _ int64, sessionID string, _ time.Duration) error {
 	s.maskedSessionID = sessionID
 	return nil
 }
 
 func TestIdentityService_RewriteUserID_PreservesTopLevelFieldOrder(t *testing.T) {
 	cache := &identityCacheStub{}
-	svc := NewIdentityService(cache)
+	svc := NewIdentityService(cache, nil)
 
 	originalUserID := FormatMetadataUserID(
 		"d61f76d0730d2b920763648949bad5c79742155c27037fc77ac3f9805cb90169",
@@ -49,7 +50,7 @@ func TestIdentityService_RewriteUserID_PreservesTopLevelFieldOrder(t *testing.T)
 
 func TestIdentityService_RewriteUserIDWithMasking_PreservesTopLevelFieldOrder(t *testing.T) {
 	cache := &identityCacheStub{maskedSessionID: "11111111-2222-4333-8444-555555555555"}
-	svc := NewIdentityService(cache)
+	svc := NewIdentityService(cache, nil)
 
 	originalUserID := FormatMetadataUserID(
 		"d61f76d0730d2b920763648949bad5c79742155c27037fc77ac3f9805cb90169",

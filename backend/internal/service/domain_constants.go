@@ -262,6 +262,10 @@ const (
 
 	// api-station: Request audit
 	SettingKeyAuditRetentionDays = "apistation_audit_retention_days" // 审计日志保留天数（默认 7）
+
+	// api-station: Session TTL configuration
+	SettingKeySessionTTLMinMinutes = "apistation_session_ttl_min_minutes" // 会话ID伪装最小TTL（分钟，默认 30）
+	SettingKeySessionTTLMaxMinutes = "apistation_session_ttl_max_minutes" // 会话ID伪装最大TTL（分钟，默认 300）
 )
 
 // AdminAPIKeyPrefix is the prefix for admin API keys (distinct from user "sk-" keys).

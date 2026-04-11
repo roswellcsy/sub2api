@@ -2126,3 +2126,20 @@ func (s *SettingService) SetStreamTimeoutSettings(ctx context.Context, settings 
 
 	return s.settingRepo.Set(ctx, SettingKeyStreamTimeoutSettings, string(data))
 }
+
+// GetSessionTTLRange 获取会话ID伪装的 TTL 范围（分钟）
+// 默认: min=30, max=300
+func (s *SettingService) GetSessionTTLRange(ctx context.Context) (minMinutes, maxMinutes int) {
+	minMinutes, maxMinutes = 30, 300
+	if v, err := s.settingRepo.GetValue(ctx, SettingKeySessionTTLMinMinutes); err == nil && v != "" {
+		if n, err := strconv.Atoi(v); err == nil && n > 0 {
+			minMinutes = n
+		}
+	}
+	if v, err := s.settingRepo.GetValue(ctx, SettingKeySessionTTLMaxMinutes); err == nil && v != "" {
+		if n, err := strconv.Atoi(v); err == nil && n > 0 {
+			maxMinutes = n
+		}
+	}
+	return minMinutes, maxMinutes
+}

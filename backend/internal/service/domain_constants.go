@@ -266,6 +266,12 @@ const (
 	// api-station: Session TTL configuration
 	SettingKeySessionTTLMinMinutes = "apistation_session_ttl_min_minutes" // 会话ID伪装最小TTL（分钟，默认 30）
 	SettingKeySessionTTLMaxMinutes = "apistation_session_ttl_max_minutes" // 会话ID伪装最大TTL（分钟，默认 300）
+
+	// api-station: Beta header injection configuration
+	SettingKeyBetaHeaderOAuth       = "apistation_beta_header_oauth"        // OAuth 非 Haiku 模型的 beta header（逗号分隔，默认同 claude.DefaultBetaHeader）
+	SettingKeyBetaHeaderOAuthHaiku  = "apistation_beta_header_oauth_haiku"  // OAuth Haiku 模型的 beta header（默认同 claude.HaikuBetaHeader）
+	SettingKeyBetaHeaderAPIKey      = "apistation_beta_header_apikey"       // API Key 非 Haiku 模型的 beta header（默认同 claude.APIKeyBetaHeader）
+	SettingKeyBetaHeaderAPIKeyHaiku = "apistation_beta_header_apikey_haiku" // API Key Haiku 模型的 beta header（默认同 claude.APIKeyHaikuBetaHeader）
 )
 
 // AdminAPIKeyPrefix is the prefix for admin API keys (distinct from user "sk-" keys).

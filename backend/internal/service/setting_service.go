@@ -2127,6 +2127,26 @@ func (s *SettingService) SetStreamTimeoutSettings(ctx context.Context, settings 
 	return s.settingRepo.Set(ctx, SettingKeyStreamTimeoutSettings, string(data))
 }
 
+// GetBetaHeaderOverrides 返回可配置的 beta header 注入值
+// 返回 4 个值: oauth, oauthHaiku, apiKey, apiKeyHaiku
+// 空字符串表示使用默认值
+func (s *SettingService) GetBetaHeaderOverrides(ctx context.Context) (oauth, oauthHaiku, apiKey, apiKeyHaiku string) {
+	keys := []string{
+		SettingKeyBetaHeaderOAuth,
+		SettingKeyBetaHeaderOAuthHaiku,
+		SettingKeyBetaHeaderAPIKey,
+		SettingKeyBetaHeaderAPIKeyHaiku,
+	}
+	values, err := s.settingRepo.GetMultiple(ctx, keys)
+	if err != nil {
+		return "", "", "", ""
+	}
+	return values[SettingKeyBetaHeaderOAuth],
+		values[SettingKeyBetaHeaderOAuthHaiku],
+		values[SettingKeyBetaHeaderAPIKey],
+		values[SettingKeyBetaHeaderAPIKeyHaiku]
+}
+
 // GetSessionTTLRange 获取会话ID伪装的 TTL 范围（分钟）
 // 默认: min=30, max=300
 func (s *SettingService) GetSessionTTLRange(ctx context.Context) (minMinutes, maxMinutes int) {

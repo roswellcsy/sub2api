@@ -5656,7 +5656,7 @@ func (s *GatewayService) buildUpstreamRequest(ctx context.Context, c *gin.Contex
 		} else {
 			// Claude Code 客户端：尽量透传原始 header，仅补齐 oauth beta
 			clientBetaHeader := getHeaderRaw(req.Header, "anthropic-beta")
-			setHeaderRaw(req.Header, "anthropic-beta", stripBetaTokensWithSet(s.getBetaHeader(modelID, clientBetaHeader), effectiveDropSet))
+			setHeaderRaw(req.Header, "anthropic-beta", stripBetaTokensWithSet(s.getBetaHeader(ctx, modelID, clientBetaHeader), effectiveDropSet))
 		}
 	} else {
 		// API-key accounts: apply beta policy filter to strip controlled tokens
@@ -5665,7 +5665,7 @@ func (s *GatewayService) buildUpstreamRequest(ctx context.Context, c *gin.Contex
 		} else if s.cfg != nil && s.cfg.Gateway.InjectBetaForAPIKey {
 			// API-key：仅在请求显式使用 beta 特性且客户端未提供时，按需补齐（默认关闭）
 			if requestNeedsBetaFeatures(body) {
-				if beta := defaultAPIKeyBetaHeader(body); beta != "" {
+				if beta := s.defaultAPIKeyBetaHeader(ctx, body); beta != "" {
 					setHeaderRaw(req.Header, "anthropic-beta", beta)
 				}
 			}
@@ -5705,7 +5705,7 @@ func (s *GatewayService) buildUpstreamRequest(ctx context.Context, c *gin.Contex
 
 // getBetaHeader 处理anthropic-beta header
 // 对于OAuth账号，需要确保包含oauth-2025-04-20
-func (s *GatewayService) getBetaHeader(modelID string, clientBetaHeader string) string {
+func (s *GatewayService) getBetaHeader(ctx context.Context, modelID string, clientBetaHeader string) string {
 	// 如果客户端传了anthropic-beta
 	if clientBetaHeader != "" {
 		// 已包含oauth beta则直接返回
@@ -5741,12 +5741,20 @@ func (s *GatewayService) getBetaHeader(modelID string, clientBetaHeader string) 
 		return claude.BetaOAuth + "," + clientBetaHeader
 	}
 
-	// 客户端没传，根据模型生成
-	// haiku 模型不需要 claude-code beta
+	// 客户端没传，根据模型生成（优先使用 DB 配置）
+	var oauth, oauthHaiku string
+	if s.settingService != nil {
+		oauth, oauthHaiku, _, _ = s.settingService.GetBetaHeaderOverrides(ctx)
+	}
 	if strings.Contains(strings.ToLower(modelID), "haiku") {
+		if oauthHaiku != "" {
+			return oauthHaiku
+		}
 		return claude.HaikuBetaHeader
 	}
-
+	if oauth != "" {
+		return oauth
+	}
 	return claude.DefaultBetaHeader
 }
 
@@ -5762,10 +5770,20 @@ func requestNeedsBetaFeatures(body []byte) bool {
 	return false
 }
 
-func defaultAPIKeyBetaHeader(body []byte) string {
+func (s *GatewayService) defaultAPIKeyBetaHeader(ctx context.Context, body []byte) string {
+	var apiKey, apiKeyHaiku string
+	if s.settingService != nil {
+		_, _, apiKey, apiKeyHaiku = s.settingService.GetBetaHeaderOverrides(ctx)
+	}
 	modelID := gjson.GetBytes(body, "model").String()
 	if strings.Contains(strings.ToLower(modelID), "haiku") {
+		if apiKeyHaiku != "" {
+			return apiKeyHaiku
+		}
 		return claude.APIKeyHaikuBetaHeader
+	}
+	if apiKey != "" {
+		return apiKey
 	}
 	return claude.APIKeyBetaHeader
 }
@@ -8558,7 +8576,7 @@ func (s *GatewayService) buildCountTokensRequest(ctx context.Context, c *gin.Con
 			if clientBetaHeader == "" {
 				setHeaderRaw(req.Header, "anthropic-beta", claude.CountTokensBetaHeader)
 			} else {
-				beta := s.getBetaHeader(modelID, clientBetaHeader)
+				beta := s.getBetaHeader(ctx, modelID, clientBetaHeader)
 				if !strings.Contains(beta, claude.BetaTokenCounting) {
 					beta = beta + "," + claude.BetaTokenCounting
 				}
@@ -8572,7 +8590,7 @@ func (s *GatewayService) buildCountTokensRequest(ctx context.Context, c *gin.Con
 		} else if s.cfg != nil && s.cfg.Gateway.InjectBetaForAPIKey {
 			// API-key：与 messages 同步的按需 beta 注入（默认关闭）
 			if requestNeedsBetaFeatures(body) {
-				if beta := defaultAPIKeyBetaHeader(body); beta != "" {
+				if beta := s.defaultAPIKeyBetaHeader(ctx, body); beta != "" {
 					setHeaderRaw(req.Header, "anthropic-beta", beta)
 				}
 			}

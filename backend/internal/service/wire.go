@@ -464,6 +464,7 @@ var ProviderSet = wire.NewSet(
 	NewModelPricingResolver,
 	ProvidePaymentConfigService,
 	NewPaymentService,
+	ProvideApistationMonitorService,
 	ProvidePaymentOrderExpiryService,
 )
 
@@ -476,6 +477,13 @@ func ProvidePaymentConfigService(entClient *dbent.Client, settingRepo SettingRep
 // ProvidePaymentOrderExpiryService creates and starts PaymentOrderExpiryService.
 func ProvidePaymentOrderExpiryService(paymentSvc *PaymentService) *PaymentOrderExpiryService {
 	svc := NewPaymentOrderExpiryService(paymentSvc, 60*time.Second)
+	svc.Start()
+	return svc
+}
+
+// ProvideApistationMonitorService creates and starts ApistationMonitorService.
+func ProvideApistationMonitorService(opsService *OpsService, settingService *SettingService) *ApistationMonitorService {
+	svc := NewApistationMonitorService(opsService, settingService)
 	svc.Start()
 	return svc
 }

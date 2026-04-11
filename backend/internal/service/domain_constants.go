@@ -255,7 +255,7 @@ const (
 
 	// api-station: Fingerprint configuration
 	SettingKeyFingerprintSalt = "apistation_fingerprint_salt" // 指纹盐值（默认 59cf53e54c78）
-	SettingKeyCLIVersion      = "apistation_cli_version"     // Claude CLI 版本号
+	SettingKeyCLIVersion      = "apistation_cli_version"      // Claude CLI 版本号
 
 	// api-station: Cooldown configuration
 	SettingKeyCooldownConfig = "apistation_cooldown_config" // 分级退避配置 JSON
@@ -276,6 +276,12 @@ const (
 	// api-station: Sensitive word obfuscation
 	SettingKeySensitiveWordsEnabled = "apistation_sensitive_words_enabled" // 是否启用敏感词混淆（默认 false）
 	SettingKeySensitiveWordsList    = "apistation_sensitive_words_list"    // 自定义敏感词列表（JSON 数组，默认使用内置列表）
+
+	// api-station: Monitor service
+	SettingKeyFeishuWebhookURL      = "apistation_feishu_webhook_url"       // 飞书告警 Webhook URL
+	SettingKeyMonitorCheckInterval  = "apistation_monitor_check_interval"   // 监控检查间隔（秒，默认 300）
+	SettingKeyBanAlertThreshold     = "apistation_ban_alert_threshold"      // 封号预警阈值（连续失败次数，默认 3）
+	SettingKeyLatestKnownCLIVersion = "apistation_latest_known_cli_version" // 最新已知 CC CLI 版本号
 )
 
 // AdminAPIKeyPrefix is the prefix for admin API keys (distinct from user "sk-" keys).

@@ -46,8 +46,6 @@ func initializeApplication(buildInfo handler.BuildInfo) (*Application, error) {
 		payment.ProvideRegistry,
 		payment.ProvideEncryptionKey,
 		payment.ProvideDefaultLoadBalancer,
-		service.ProvidePaymentConfigService,
-		service.ProvidePaymentOrderExpiryService,
 
 		// Privacy client factory for OpenAI training opt-out
 		providePrivacyClientFactory,
@@ -103,6 +101,7 @@ func provideCleanup(
 	scheduledTestRunner *service.ScheduledTestRunnerService,
 	backupSvc *service.BackupService,
 	paymentOrderExpiry *service.PaymentOrderExpiryService,
+	apistationMonitor *service.ApistationMonitorService,
 ) func() {
 	return func() {
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -236,6 +235,12 @@ func provideCleanup(
 			{"BackupService", func() error {
 				if backupSvc != nil {
 					backupSvc.Stop()
+				}
+				return nil
+			}},
+			{"ApistationMonitorService", func() error {
+				if apistationMonitor != nil {
+					apistationMonitor.Stop()
 				}
 				return nil
 			}},

@@ -91,6 +91,9 @@ func RegisterAdminRoutes(
 
 		// api-station: 审计日志
 		registerApistationAuditRoutes(admin, h)
+
+		// api-station: 账号健康度
+		registerApistationHealthRoutes(admin, h)
 	}
 }
 
@@ -99,6 +102,13 @@ func registerApistationAuditRoutes(admin *gin.RouterGroup, h *handler.Handlers) 
 	{
 		audit.GET("/account/:id", h.Admin.ApistationAudit.GetAccountAudit)
 		audit.GET("/recent-errors", h.Admin.ApistationAudit.GetRecentErrors)
+	}
+}
+
+func registerApistationHealthRoutes(admin *gin.RouterGroup, h *handler.Handlers) {
+	apistation := admin.Group("/apistation")
+	{
+		apistation.GET("/health", h.Admin.ApistationHealth.GetAccountHealth)
 	}
 }
 

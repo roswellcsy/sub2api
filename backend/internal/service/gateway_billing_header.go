@@ -8,11 +8,13 @@ import (
 	"github.com/cespare/xxhash/v2"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
+
+	"github.com/Wei-Shaw/sub2api/internal/pkg/apistation"
 )
 
 // ccVersionInBillingRe matches the semver part of cc_version (X.Y.Z), preserving
 // the trailing message-derived suffix (e.g. ".c02") if present.
-var ccVersionInBillingRe = regexp.MustCompile(`cc_version=\d+\.\d+\.\d+`)
+var ccVersionInBillingRe = regexp.MustCompile(`cc_version=\d+\.\d+\.\d+(?:\.[a-f0-9]{3})?`)
 
 // cchPlaceholderRe matches the cch=00000 placeholder in billing header text,
 // scoped to x-anthropic-billing-header to avoid touching user content.
@@ -35,12 +37,22 @@ func syncBillingHeaderVersion(body []byte, userAgent string) []byte {
 	}
 
 	replacement := "cc_version=" + version
+	// api-station: begin - fingerprint suffix (from auth2api)
+	msgText := apistation.ExtractFirstUserMessageText(body)
+	fp := apistation.ComputeFingerprint(msgText, version, "")
+	replacement = replacement + "." + fp
+	// api-station: end
 	idx := 0
 	systemResult.ForEach(func(_, item gjson.Result) bool {
 		text := item.Get("text")
 		if text.Exists() && text.Type == gjson.String &&
 			strings.HasPrefix(text.String(), "x-anthropic-billing-header") {
 			newText := ccVersionInBillingRe.ReplaceAllString(text.String(), replacement)
+			// api-station: begin - entrypoint field
+			if !strings.Contains(newText, "cc_entrypoint=") {
+				newText = strings.TrimRight(newText, " ") + " cc_entrypoint=cli;"
+			}
+			// api-station: end
 			if newText != text.String() {
 				if updated, err := sjson.SetBytes(body, fmt.Sprintf("system.%d.text", idx), newText); err == nil {
 					body = updated

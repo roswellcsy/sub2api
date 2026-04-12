@@ -175,6 +175,23 @@ func (h *SettingHandler) GetSettings(c *gin.Context) {
 		EnableFingerprintUnification:         settings.EnableFingerprintUnification,
 		EnableMetadataPassthrough:            settings.EnableMetadataPassthrough,
 		EnableCCHSigning:                     settings.EnableCCHSigning,
+		ApistationBillingEntrypoint:          settings.ApistationBillingEntrypoint,
+		ApistationFingerprintSalt:            settings.ApistationFingerprintSalt,
+		ApistationCLIVersion:                 settings.ApistationCLIVersion,
+		ApistationCooldownConfig:             settings.ApistationCooldownConfig,
+		ApistationAuditRetentionDays:         settings.ApistationAuditRetentionDays,
+		ApistationSessionTTLMinMinutes:       settings.ApistationSessionTTLMinMinutes,
+		ApistationSessionTTLMaxMinutes:       settings.ApistationSessionTTLMaxMinutes,
+		ApistationBetaHeaderOAuth:            settings.ApistationBetaHeaderOAuth,
+		ApistationBetaHeaderOAuthHaiku:       settings.ApistationBetaHeaderOAuthHaiku,
+		ApistationBetaHeaderAPIKey:           settings.ApistationBetaHeaderAPIKey,
+		ApistationBetaHeaderAPIKeyHaiku:      settings.ApistationBetaHeaderAPIKeyHaiku,
+		ApistationSensitiveWordsEnabled:      settings.ApistationSensitiveWordsEnabled,
+		ApistationSensitiveWordsList:         settings.ApistationSensitiveWordsList,
+		ApistationFeishuWebhookURL:           settings.ApistationFeishuWebhookURL,
+		ApistationMonitorCheckInterval:       settings.ApistationMonitorCheckInterval,
+		ApistationBanAlertThreshold:          settings.ApistationBanAlertThreshold,
+		ApistationLatestKnownCLIVersion:      settings.ApistationLatestKnownCLIVersion,
 		PaymentEnabled:                       paymentCfg.Enabled,
 		PaymentMinAmount:                     paymentCfg.MinAmount,
 		PaymentMaxAmount:                     paymentCfg.MaxAmount,
@@ -303,6 +320,25 @@ type UpdateSettingsRequest struct {
 	EnableFingerprintUnification *bool `json:"enable_fingerprint_unification"`
 	EnableMetadataPassthrough    *bool `json:"enable_metadata_passthrough"`
 	EnableCCHSigning             *bool `json:"enable_cch_signing"`
+
+	// API Station configuration
+	ApistationBillingEntrypoint     string `json:"apistation_billing_entrypoint"`
+	ApistationFingerprintSalt       string `json:"apistation_fingerprint_salt"`
+	ApistationCLIVersion            string `json:"apistation_cli_version"`
+	ApistationCooldownConfig        string `json:"apistation_cooldown_config"`
+	ApistationAuditRetentionDays    int    `json:"apistation_audit_retention_days"`
+	ApistationSessionTTLMinMinutes  int    `json:"apistation_session_ttl_min_minutes"`
+	ApistationSessionTTLMaxMinutes  int    `json:"apistation_session_ttl_max_minutes"`
+	ApistationBetaHeaderOAuth       string `json:"apistation_beta_header_oauth"`
+	ApistationBetaHeaderOAuthHaiku  string `json:"apistation_beta_header_oauth_haiku"`
+	ApistationBetaHeaderAPIKey      string `json:"apistation_beta_header_apikey"`
+	ApistationBetaHeaderAPIKeyHaiku string `json:"apistation_beta_header_apikey_haiku"`
+	ApistationSensitiveWordsEnabled bool   `json:"apistation_sensitive_words_enabled"`
+	ApistationSensitiveWordsList    string `json:"apistation_sensitive_words_list"`
+	ApistationFeishuWebhookURL      string `json:"apistation_feishu_webhook_url"`
+	ApistationMonitorCheckInterval  int    `json:"apistation_monitor_check_interval"`
+	ApistationBanAlertThreshold     int    `json:"apistation_ban_alert_threshold"`
+	ApistationLatestKnownCLIVersion string `json:"apistation_latest_known_cli_version"`
 
 	// Payment configuration (integrated into settings, full replace)
 	PaymentEnabled           *bool    `json:"payment_enabled"`
@@ -881,6 +917,23 @@ func (h *SettingHandler) UpdateSettings(c *gin.Context) {
 			}
 			return previousSettings.EnableCCHSigning
 		}(),
+		ApistationBillingEntrypoint:     req.ApistationBillingEntrypoint,
+		ApistationFingerprintSalt:       req.ApistationFingerprintSalt,
+		ApistationCLIVersion:            req.ApistationCLIVersion,
+		ApistationCooldownConfig:        req.ApistationCooldownConfig,
+		ApistationAuditRetentionDays:    req.ApistationAuditRetentionDays,
+		ApistationSessionTTLMinMinutes:  req.ApistationSessionTTLMinMinutes,
+		ApistationSessionTTLMaxMinutes:  req.ApistationSessionTTLMaxMinutes,
+		ApistationBetaHeaderOAuth:       req.ApistationBetaHeaderOAuth,
+		ApistationBetaHeaderOAuthHaiku:  req.ApistationBetaHeaderOAuthHaiku,
+		ApistationBetaHeaderAPIKey:      req.ApistationBetaHeaderAPIKey,
+		ApistationBetaHeaderAPIKeyHaiku: req.ApistationBetaHeaderAPIKeyHaiku,
+		ApistationSensitiveWordsEnabled: req.ApistationSensitiveWordsEnabled,
+		ApistationSensitiveWordsList:    req.ApistationSensitiveWordsList,
+		ApistationFeishuWebhookURL:      req.ApistationFeishuWebhookURL,
+		ApistationMonitorCheckInterval:  req.ApistationMonitorCheckInterval,
+		ApistationBanAlertThreshold:     req.ApistationBanAlertThreshold,
+		ApistationLatestKnownCLIVersion: req.ApistationLatestKnownCLIVersion,
 	}
 
 	if err := h.settingService.UpdateSettings(c.Request.Context(), settings); err != nil {
@@ -1027,6 +1080,23 @@ func (h *SettingHandler) UpdateSettings(c *gin.Context) {
 		EnableFingerprintUnification:         updatedSettings.EnableFingerprintUnification,
 		EnableMetadataPassthrough:            updatedSettings.EnableMetadataPassthrough,
 		EnableCCHSigning:                     updatedSettings.EnableCCHSigning,
+		ApistationBillingEntrypoint:          updatedSettings.ApistationBillingEntrypoint,
+		ApistationFingerprintSalt:            updatedSettings.ApistationFingerprintSalt,
+		ApistationCLIVersion:                 updatedSettings.ApistationCLIVersion,
+		ApistationCooldownConfig:             updatedSettings.ApistationCooldownConfig,
+		ApistationAuditRetentionDays:         updatedSettings.ApistationAuditRetentionDays,
+		ApistationSessionTTLMinMinutes:       updatedSettings.ApistationSessionTTLMinMinutes,
+		ApistationSessionTTLMaxMinutes:       updatedSettings.ApistationSessionTTLMaxMinutes,
+		ApistationBetaHeaderOAuth:            updatedSettings.ApistationBetaHeaderOAuth,
+		ApistationBetaHeaderOAuthHaiku:       updatedSettings.ApistationBetaHeaderOAuthHaiku,
+		ApistationBetaHeaderAPIKey:           updatedSettings.ApistationBetaHeaderAPIKey,
+		ApistationBetaHeaderAPIKeyHaiku:      updatedSettings.ApistationBetaHeaderAPIKeyHaiku,
+		ApistationSensitiveWordsEnabled:      updatedSettings.ApistationSensitiveWordsEnabled,
+		ApistationSensitiveWordsList:         updatedSettings.ApistationSensitiveWordsList,
+		ApistationFeishuWebhookURL:           updatedSettings.ApistationFeishuWebhookURL,
+		ApistationMonitorCheckInterval:       updatedSettings.ApistationMonitorCheckInterval,
+		ApistationBanAlertThreshold:          updatedSettings.ApistationBanAlertThreshold,
+		ApistationLatestKnownCLIVersion:      updatedSettings.ApistationLatestKnownCLIVersion,
 		PaymentEnabled:                       updatedPaymentCfg.Enabled,
 		PaymentMinAmount:                     updatedPaymentCfg.MinAmount,
 		PaymentMaxAmount:                     updatedPaymentCfg.MaxAmount,

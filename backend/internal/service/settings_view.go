@@ -106,6 +106,25 @@ type SystemSettings struct {
 	EnableFingerprintUnification bool // 是否统一 OAuth 账号的指纹头（默认 true）
 	EnableMetadataPassthrough    bool // 是否透传客户端原始 metadata（默认 false）
 	EnableCCHSigning             bool // 是否对 billing header cch 进行签名（默认 false）
+
+	// API Station configuration
+	ApistationBillingEntrypoint     string
+	ApistationFingerprintSalt       string
+	ApistationCLIVersion            string
+	ApistationCooldownConfig        string
+	ApistationAuditRetentionDays    int
+	ApistationSessionTTLMinMinutes  int
+	ApistationSessionTTLMaxMinutes  int
+	ApistationBetaHeaderOAuth       string
+	ApistationBetaHeaderOAuthHaiku  string
+	ApistationBetaHeaderAPIKey      string
+	ApistationBetaHeaderAPIKeyHaiku string
+	ApistationSensitiveWordsEnabled bool
+	ApistationSensitiveWordsList    string
+	ApistationFeishuWebhookURL      string
+	ApistationMonitorCheckInterval  int
+	ApistationBanAlertThreshold     int
+	ApistationLatestKnownCLIVersion string
 }
 
 type DefaultSubscriptionSetting struct {

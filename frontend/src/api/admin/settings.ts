@@ -115,6 +115,25 @@ export interface SystemSettings {
   enable_metadata_passthrough: boolean
   enable_cch_signing: boolean
 
+  // API Station configuration
+  apistation_billing_entrypoint: string
+  apistation_fingerprint_salt: string
+  apistation_cli_version: string
+  apistation_cooldown_config: string
+  apistation_audit_retention_days: number
+  apistation_session_ttl_min_minutes: number
+  apistation_session_ttl_max_minutes: number
+  apistation_beta_header_oauth: string
+  apistation_beta_header_oauth_haiku: string
+  apistation_beta_header_apikey: string
+  apistation_beta_header_apikey_haiku: string
+  apistation_sensitive_words_enabled: boolean
+  apistation_sensitive_words_list: string
+  apistation_feishu_webhook_url: string
+  apistation_monitor_check_interval: number
+  apistation_ban_alert_threshold: number
+  apistation_latest_known_cli_version: string
+
   // Payment configuration
   payment_enabled: boolean
   payment_min_amount: number
@@ -214,6 +233,26 @@ export interface UpdateSettingsRequest {
   enable_fingerprint_unification?: boolean
   enable_metadata_passthrough?: boolean
   enable_cch_signing?: boolean
+
+  // API Station configuration
+  apistation_billing_entrypoint?: string
+  apistation_fingerprint_salt?: string
+  apistation_cli_version?: string
+  apistation_cooldown_config?: string
+  apistation_audit_retention_days?: number
+  apistation_session_ttl_min_minutes?: number
+  apistation_session_ttl_max_minutes?: number
+  apistation_beta_header_oauth?: string
+  apistation_beta_header_oauth_haiku?: string
+  apistation_beta_header_apikey?: string
+  apistation_beta_header_apikey_haiku?: string
+  apistation_sensitive_words_enabled?: boolean
+  apistation_sensitive_words_list?: string
+  apistation_feishu_webhook_url?: string
+  apistation_monitor_check_interval?: number
+  apistation_ban_alert_threshold?: number
+  apistation_latest_known_cli_version?: string
+
   // Payment configuration
   payment_enabled?: boolean
   payment_min_amount?: number

@@ -2730,7 +2730,25 @@ const form = reactive<SettingsForm>({
   // Gateway forwarding behavior
   enable_fingerprint_unification: true,
   enable_metadata_passthrough: false,
-  enable_cch_signing: false
+  enable_cch_signing: false,
+  // API Station configuration
+  apistation_billing_entrypoint: 'cli',
+  apistation_fingerprint_salt: '59cf53e54c78',
+  apistation_cli_version: '',
+  apistation_cooldown_config: '',
+  apistation_audit_retention_days: 7,
+  apistation_session_ttl_min_minutes: 30,
+  apistation_session_ttl_max_minutes: 300,
+  apistation_beta_header_oauth: '',
+  apistation_beta_header_oauth_haiku: '',
+  apistation_beta_header_apikey: '',
+  apistation_beta_header_apikey_haiku: '',
+  apistation_sensitive_words_enabled: false,
+  apistation_sensitive_words_list: '',
+  apistation_feishu_webhook_url: '',
+  apistation_monitor_check_interval: 300,
+  apistation_ban_alert_threshold: 3,
+  apistation_latest_known_cli_version: ''
 })
 
 const defaultSubscriptionGroupOptions = computed<DefaultSubscriptionGroupOption[]>(() =>
@@ -3129,6 +3147,23 @@ async function saveSettings() {
       enable_fingerprint_unification: form.enable_fingerprint_unification,
       enable_metadata_passthrough: form.enable_metadata_passthrough,
       enable_cch_signing: form.enable_cch_signing,
+      apistation_billing_entrypoint: form.apistation_billing_entrypoint,
+      apistation_fingerprint_salt: form.apistation_fingerprint_salt,
+      apistation_cli_version: form.apistation_cli_version,
+      apistation_cooldown_config: form.apistation_cooldown_config,
+      apistation_audit_retention_days: Number(form.apistation_audit_retention_days) || 7,
+      apistation_session_ttl_min_minutes: Number(form.apistation_session_ttl_min_minutes) || 30,
+      apistation_session_ttl_max_minutes: Number(form.apistation_session_ttl_max_minutes) || 300,
+      apistation_beta_header_oauth: form.apistation_beta_header_oauth,
+      apistation_beta_header_oauth_haiku: form.apistation_beta_header_oauth_haiku,
+      apistation_beta_header_apikey: form.apistation_beta_header_apikey,
+      apistation_beta_header_apikey_haiku: form.apistation_beta_header_apikey_haiku,
+      apistation_sensitive_words_enabled: form.apistation_sensitive_words_enabled,
+      apistation_sensitive_words_list: form.apistation_sensitive_words_list,
+      apistation_feishu_webhook_url: form.apistation_feishu_webhook_url,
+      apistation_monitor_check_interval: Number(form.apistation_monitor_check_interval) || 300,
+      apistation_ban_alert_threshold: Number(form.apistation_ban_alert_threshold) || 3,
+      apistation_latest_known_cli_version: form.apistation_latest_known_cli_version,
       // Payment configuration
       payment_enabled: form.payment_enabled,
       payment_min_amount: Number(form.payment_min_amount) || 0,

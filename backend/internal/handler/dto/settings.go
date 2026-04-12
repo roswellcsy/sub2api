@@ -124,6 +124,25 @@ type SystemSettings struct {
 	EnableMetadataPassthrough    bool `json:"enable_metadata_passthrough"`
 	EnableCCHSigning             bool `json:"enable_cch_signing"`
 
+	// API Station configuration
+	ApistationBillingEntrypoint     string `json:"apistation_billing_entrypoint"`
+	ApistationFingerprintSalt       string `json:"apistation_fingerprint_salt"`
+	ApistationCLIVersion            string `json:"apistation_cli_version"`
+	ApistationCooldownConfig        string `json:"apistation_cooldown_config"`
+	ApistationAuditRetentionDays    int    `json:"apistation_audit_retention_days"`
+	ApistationSessionTTLMinMinutes  int    `json:"apistation_session_ttl_min_minutes"`
+	ApistationSessionTTLMaxMinutes  int    `json:"apistation_session_ttl_max_minutes"`
+	ApistationBetaHeaderOAuth       string `json:"apistation_beta_header_oauth"`
+	ApistationBetaHeaderOAuthHaiku  string `json:"apistation_beta_header_oauth_haiku"`
+	ApistationBetaHeaderAPIKey      string `json:"apistation_beta_header_apikey"`
+	ApistationBetaHeaderAPIKeyHaiku string `json:"apistation_beta_header_apikey_haiku"`
+	ApistationSensitiveWordsEnabled bool   `json:"apistation_sensitive_words_enabled"`
+	ApistationSensitiveWordsList    string `json:"apistation_sensitive_words_list"`
+	ApistationFeishuWebhookURL      string `json:"apistation_feishu_webhook_url"`
+	ApistationMonitorCheckInterval  int    `json:"apistation_monitor_check_interval"`
+	ApistationBanAlertThreshold     int    `json:"apistation_ban_alert_threshold"`
+	ApistationLatestKnownCLIVersion string `json:"apistation_latest_known_cli_version"`
+
 	// Payment configuration
 	PaymentEnabled           bool     `json:"payment_enabled"`
 	PaymentMinAmount         float64  `json:"payment_min_amount"`

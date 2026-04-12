@@ -595,6 +595,25 @@ func (s *SettingService) UpdateSettings(ctx context.Context, settings *SystemSet
 	updates[SettingKeyEnableMetadataPassthrough] = strconv.FormatBool(settings.EnableMetadataPassthrough)
 	updates[SettingKeyEnableCCHSigning] = strconv.FormatBool(settings.EnableCCHSigning)
 
+	// API Station settings
+	updates[SettingKeyBillingEntrypoint] = settings.ApistationBillingEntrypoint
+	updates[SettingKeyFingerprintSalt] = settings.ApistationFingerprintSalt
+	updates[SettingKeyCLIVersion] = settings.ApistationCLIVersion
+	updates[SettingKeyCooldownConfig] = settings.ApistationCooldownConfig
+	updates[SettingKeyAuditRetentionDays] = strconv.Itoa(settings.ApistationAuditRetentionDays)
+	updates[SettingKeySessionTTLMinMinutes] = strconv.Itoa(settings.ApistationSessionTTLMinMinutes)
+	updates[SettingKeySessionTTLMaxMinutes] = strconv.Itoa(settings.ApistationSessionTTLMaxMinutes)
+	updates[SettingKeyBetaHeaderOAuth] = settings.ApistationBetaHeaderOAuth
+	updates[SettingKeyBetaHeaderOAuthHaiku] = settings.ApistationBetaHeaderOAuthHaiku
+	updates[SettingKeyBetaHeaderAPIKey] = settings.ApistationBetaHeaderAPIKey
+	updates[SettingKeyBetaHeaderAPIKeyHaiku] = settings.ApistationBetaHeaderAPIKeyHaiku
+	updates[SettingKeySensitiveWordsEnabled] = strconv.FormatBool(settings.ApistationSensitiveWordsEnabled)
+	updates[SettingKeySensitiveWordsList] = settings.ApistationSensitiveWordsList
+	updates[SettingKeyFeishuWebhookURL] = settings.ApistationFeishuWebhookURL
+	updates[SettingKeyMonitorCheckInterval] = strconv.Itoa(settings.ApistationMonitorCheckInterval)
+	updates[SettingKeyBanAlertThreshold] = strconv.Itoa(settings.ApistationBanAlertThreshold)
+	updates[SettingKeyLatestKnownCLIVersion] = settings.ApistationLatestKnownCLIVersion
+
 	err = s.settingRepo.SetMultiple(ctx, updates)
 	if err == nil {
 		// 先使 inflight singleflight 失效，再刷新缓存，缩小旧值覆盖新值的竞态窗口
@@ -1216,6 +1235,46 @@ func (s *SettingService) parseSettings(settings map[string]string) *SystemSettin
 	}
 	result.EnableMetadataPassthrough = settings[SettingKeyEnableMetadataPassthrough] == "true"
 	result.EnableCCHSigning = settings[SettingKeyEnableCCHSigning] == "true"
+
+	// API Station settings
+	result.ApistationBillingEntrypoint = s.getStringOrDefault(settings, SettingKeyBillingEntrypoint, "cli")
+	result.ApistationFingerprintSalt = s.getStringOrDefault(settings, SettingKeyFingerprintSalt, "59cf53e54c78")
+	result.ApistationCLIVersion = settings[SettingKeyCLIVersion]
+	result.ApistationCooldownConfig = settings[SettingKeyCooldownConfig]
+	result.ApistationSensitiveWordsEnabled = settings[SettingKeySensitiveWordsEnabled] == "true"
+	result.ApistationSensitiveWordsList = settings[SettingKeySensitiveWordsList]
+	result.ApistationFeishuWebhookURL = settings[SettingKeyFeishuWebhookURL]
+	result.ApistationLatestKnownCLIVersion = settings[SettingKeyLatestKnownCLIVersion]
+	result.ApistationBetaHeaderOAuth = settings[SettingKeyBetaHeaderOAuth]
+	result.ApistationBetaHeaderOAuthHaiku = settings[SettingKeyBetaHeaderOAuthHaiku]
+	result.ApistationBetaHeaderAPIKey = settings[SettingKeyBetaHeaderAPIKey]
+	result.ApistationBetaHeaderAPIKeyHaiku = settings[SettingKeyBetaHeaderAPIKeyHaiku]
+
+	if v, err := strconv.Atoi(settings[SettingKeyAuditRetentionDays]); err == nil {
+		result.ApistationAuditRetentionDays = v
+	} else {
+		result.ApistationAuditRetentionDays = 7
+	}
+	if v, err := strconv.Atoi(settings[SettingKeySessionTTLMinMinutes]); err == nil {
+		result.ApistationSessionTTLMinMinutes = v
+	} else {
+		result.ApistationSessionTTLMinMinutes = 30
+	}
+	if v, err := strconv.Atoi(settings[SettingKeySessionTTLMaxMinutes]); err == nil {
+		result.ApistationSessionTTLMaxMinutes = v
+	} else {
+		result.ApistationSessionTTLMaxMinutes = 300
+	}
+	if v, err := strconv.Atoi(settings[SettingKeyMonitorCheckInterval]); err == nil {
+		result.ApistationMonitorCheckInterval = v
+	} else {
+		result.ApistationMonitorCheckInterval = 300
+	}
+	if v, err := strconv.Atoi(settings[SettingKeyBanAlertThreshold]); err == nil {
+		result.ApistationBanAlertThreshold = v
+	} else {
+		result.ApistationBanAlertThreshold = 3
+	}
 
 	return result
 }

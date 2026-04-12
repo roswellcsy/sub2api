@@ -1,6 +1,7 @@
 package admin
 
 import (
+	"log/slog"
 	"math"
 	"net/http"
 	"time"
@@ -31,18 +32,21 @@ func (h *ApistationHealthHandler) GetAccountHealth(c *gin.Context) {
 
 	ctx := c.Request.Context()
 
-	accounts, total, err := h.adminService.ListAccounts(ctx, 1, 500, "", "", "", "", 0, "", "", "")
-	if err != nil {
-		response.ErrorFrom(c, err)
-		return
-	}
+	const (
+		pageSize    = 500
+		maxPages    = 20
+		returnLimit = 200
+	)
 
 	var (
+		total            int64
+		fetchedCount     int
 		activeCount      int64
 		errorCount       int64
 		rateLimitedCount int64
 		overloadedCount  int64
 		schedulableCount int64
+		isTruncated      bool
 	)
 
 	type accountHealth struct {
@@ -58,36 +62,61 @@ func (h *ApistationHealthHandler) GetAccountHealth(c *gin.Context) {
 	}
 
 	now := time.Now()
-	healthAccounts := make([]accountHealth, 0, len(accounts))
+	returnedAccounts := make([]accountHealth, 0, returnLimit)
 
-	for _, account := range accounts {
-		healthAccounts = append(healthAccounts, accountHealth{
-			ID:               account.ID,
-			Name:             account.Name,
-			Platform:         account.Platform,
-			Status:           account.Status,
-			Schedulable:      account.Schedulable,
-			ErrorMessage:     account.ErrorMessage,
-			LastUsedAt:       account.LastUsedAt,
-			RateLimitResetAt: account.RateLimitResetAt,
-			OverloadUntil:    account.OverloadUntil,
-		})
+	for page := 1; page <= maxPages; page++ {
+		accounts, pageTotal, err := h.adminService.ListAccounts(ctx, page, pageSize, "", "", "", "", 0, "", "", "")
+		if err != nil {
+			response.ErrorFrom(c, err)
+			return
+		}
+		if page == 1 {
+			total = pageTotal
+		}
+		if len(accounts) == 0 {
+			break
+		}
+		fetchedCount += len(accounts)
 
-		switch account.Status {
-		case service.StatusActive:
-			activeCount++
-		case service.StatusError:
-			errorCount++
+		for _, account := range accounts {
+			if len(returnedAccounts) < returnLimit {
+				returnedAccounts = append(returnedAccounts, accountHealth{
+					ID:               account.ID,
+					Name:             account.Name,
+					Platform:         account.Platform,
+					Status:           account.Status,
+					Schedulable:      account.Schedulable,
+					ErrorMessage:     account.ErrorMessage,
+					LastUsedAt:       account.LastUsedAt,
+					RateLimitResetAt: account.RateLimitResetAt,
+					OverloadUntil:    account.OverloadUntil,
+				})
+			}
+
+			switch account.Status {
+			case service.StatusActive:
+				activeCount++
+			case service.StatusError:
+				errorCount++
+			}
+
+			if account.RateLimitedAt != nil && (account.RateLimitResetAt == nil || account.RateLimitResetAt.After(now)) {
+				rateLimitedCount++
+			}
+			if account.OverloadUntil != nil && account.OverloadUntil.After(now) {
+				overloadedCount++
+			}
+			if account.Schedulable {
+				schedulableCount++
+			}
 		}
 
-		if account.RateLimitedAt != nil && (account.RateLimitResetAt == nil || account.RateLimitResetAt.After(now)) {
-			rateLimitedCount++
+		if len(accounts) < pageSize {
+			break
 		}
-		if account.OverloadUntil != nil && account.OverloadUntil.After(now) {
-			overloadedCount++
-		}
-		if account.Schedulable {
-			schedulableCount++
+		if page == maxPages && int64(fetchedCount) < total {
+			isTruncated = true
+			slog.Warn("apistation health account aggregation truncated", "total_accounts", total, "fetched_accounts_count", fetchedCount, "page_size", pageSize, "max_pages", maxPages)
 		}
 	}
 
@@ -114,14 +143,17 @@ func (h *ApistationHealthHandler) GetAccountHealth(c *gin.Context) {
 	}
 
 	response.Success(c, gin.H{
-		"total_accounts":     total,
-		"active_count":       activeCount,
-		"error_count":        errorCount,
-		"rate_limited_count": rateLimitedCount,
-		"overloaded_count":   overloadedCount,
-		"schedulable_count":  schedulableCount,
-		"availability_rate":  availabilityRate,
-		"recent_errors_1h":   recentErrorCount,
-		"accounts":           healthAccounts,
+		"total_accounts":          total,
+		"fetched_accounts_count":  fetchedCount,
+		"returned_accounts_count": len(returnedAccounts),
+		"is_truncated":            isTruncated,
+		"active_count":            activeCount,
+		"error_count":             errorCount,
+		"rate_limited_count":      rateLimitedCount,
+		"overloaded_count":        overloadedCount,
+		"schedulable_count":       schedulableCount,
+		"availability_rate":       availabilityRate,
+		"recent_errors_1h":        recentErrorCount,
+		"accounts":                returnedAccounts,
 	})
 }

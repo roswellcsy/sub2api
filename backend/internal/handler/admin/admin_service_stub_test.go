@@ -224,7 +224,26 @@ func (s *stubAdminService) ListAccounts(ctx context.Context, page, pageSize int,
 	s.lastListAccounts.sortBy = sortBy
 	s.lastListAccounts.sortOrder = sortOrder
 	s.lastListAccounts.calls++
-	return s.accounts, int64(len(s.accounts)), nil
+
+	total := int64(len(s.accounts))
+	if page < 1 {
+		page = 1
+	}
+	if pageSize <= 0 {
+		return append([]service.Account(nil), s.accounts...), total, nil
+	}
+
+	start := (page - 1) * pageSize
+	if start >= len(s.accounts) {
+		return []service.Account{}, total, nil
+	}
+
+	end := start + pageSize
+	if end > len(s.accounts) {
+		end = len(s.accounts)
+	}
+
+	return append([]service.Account(nil), s.accounts[start:end]...), total, nil
 }
 
 func (s *stubAdminService) GetAccount(ctx context.Context, id int64) (*service.Account, error) {

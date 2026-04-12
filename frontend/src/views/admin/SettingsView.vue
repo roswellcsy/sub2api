@@ -1832,7 +1832,7 @@
                 v-model="form.apistation_cooldown_config"
                 class="input font-mono text-sm"
                 rows="4"
-                :placeholder="t('admin.settings.apiStation.sessionCooldown.cooldownConfigPlaceholder')"
+                placeholder='{"rate_limit": [60, 900], "auth": [600, 3600]}'
               ></textarea>
               <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
                 {{ t('admin.settings.apiStation.sessionCooldown.cooldownConfigHint') }}

@@ -4370,7 +4370,6 @@ export default {
           sessionTtlMaxHint: 'Maximum TTL for masked session IDs',
           cooldownConfig: 'Cooldown Config (JSON)',
           cooldownConfigHint: 'Tiered backoff configuration. Leave empty for built-in defaults.',
-          cooldownConfigPlaceholder: '{"rate_limit": [60, 900], "auth": [600, 3600]}',
           auditRetentionDays: 'Audit Retention Days',
           auditRetentionDaysHint: 'Number of days to keep request audit logs',
         },

@@ -4532,7 +4532,6 @@ export default {
           sessionTtlMaxHint: '伪装会话 ID 的最大生存时间',
           cooldownConfig: '冷却配置（JSON）',
           cooldownConfigHint: '分级退避配置。留空使用内置默认值。',
-          cooldownConfigPlaceholder: '{"rate_limit": [60, 900], "auth": [600, 3600]}',
           auditRetentionDays: '审计日志保留天数',
           auditRetentionDaysHint: '请求审计日志保留天数',
         },

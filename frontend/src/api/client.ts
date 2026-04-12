@@ -92,7 +92,10 @@ apiClient.interceptors.response.use(
         response.data = apiResponse.data
       } else {
         // API error
-        const resp = apiResponse as Record<string, unknown>
+        // api-station: begin - upstream TS2352 patch (awaiting upstream PR to Wei-Shaw/sub2api)
+        // Replace single-step cast with double cast to satisfy vue-tsc -b strict build.
+        const resp = apiResponse as unknown as Record<string, unknown>
+        // api-station: end
         return Promise.reject({
           status: response.status,
           code: apiResponse.code,

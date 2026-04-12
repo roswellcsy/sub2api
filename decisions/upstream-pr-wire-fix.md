@@ -1,3 +1,5 @@
+> **Submitted**: 2026-04-12 · PR: https://github.com/Wei-Shaw/sub2api/pull/1588
+
 # Upstream PR Draft: Wire Fix
 
 **Target**: https://github.com/Wei-Shaw/sub2api

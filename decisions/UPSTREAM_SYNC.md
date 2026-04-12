@@ -24,7 +24,7 @@
 
 | 日期 | upstream 新 commits | 冲突文件数 | 冲突行数 | 解决耗时 | 主要冲突点 | 备注 |
 |---|---|---|---|---|---|---|
-| YYYY-MM-DD | N | N | +X/-Y | Nm | gateway_service.go: Forward() beta header | — |
+| 2026-04-12 | 0 | 0 | 0 | 0m | 无冲突（upstream tip 未前进） | Baseline：fork 14 commits 全为 api-station Phase 1-3+ADR，merge-base 97f14b7a；gateway_service.go +50/-9（2 个 hook 点 Forward() line 4074/4476） |
 
 ## 阈值告警规则
 
@@ -34,9 +34,20 @@
 - 单次解决耗时 > 60 分钟
 - fork 在 `gateway_service.go` 的累计改动 > 500 行
 
-## 首次演练 TODO
+## 首次演练 Baseline (2026-04-12)
 
-- [ ] 记录 baseline merge-base: `97f14b7a086bf75c72b3549e0d546907a720eb8e`
-- [ ] 记录 baseline fork divergence (`git rev-list --left-right --count main...upstream/main`): `14 0`
-- [ ] 记录 baseline upstream ahead count (`git log main..upstream/main --oneline | wc -l`): `0`
-- [ ] 记录 baseline `gateway_service.go` 差异规模，并在首次演练时补充主要冲突点说明
+- [x] merge-base: `97f14b7a086bf75c72b3549e0d546907a720eb8e`
+- [x] Fork divergence (`git rev-list --left-right --count main...upstream/main`): `14 0`
+- [x] upstream ahead count: `0`（演练时 upstream 尚无新 commit，fork 在 tip 上开发）
+- [x] gateway_service.go 差异: +50/-9 (59 行)，hook 点 2 个（Forward() line 4074 thinking signature / line 4476 request audit）
+- [x] 总 divergence: 49 文件 / +3341/-44 行
+- [x] merge-tree dry-run 冲突标记: 0（因 upstream 无新 commit）
+
+Baseline 含义: 当前 fork 处于最干净合并状态（upstream tip 上开发，无冲突）。这也意味着首次真实冲突演练需等 upstream 有新 commit（通常下次月度节点）。下次演练触发点: 观测到 `git log main..upstream/main --oneline | wc -l` > 0 后尽快执行。
+
+## 下次演练计划
+
+- 触发时机: 2026-05 月初 OR upstream 新增 commit 数 ≥ 10 时
+- 执行脚本: `bash scripts/upstream_sync_check.sh`
+- 记录项: 追加一行到上方追踪表
+- 若触发阈值（冲突 > 100 行 / 耗时 > 60m / 累计 > 500 行），引用 ADR-001 重启 Phase 4 讨论

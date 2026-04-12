@@ -1,3 +1,5 @@
+> **Submitted**: 2026-04-12 · PR: https://github.com/Wei-Shaw/sub2api/pull/1591
+
 # Upstream PR Draft: Strict Cast in API Client
 
 **Target**: https://github.com/Wei-Shaw/sub2api

@@ -261,6 +261,11 @@ func ProvideOpsAlertEvaluatorService(
 	return svc
 }
 
+// ProvideOAuthRefreshAPI wraps NewOAuthRefreshAPI to avoid Wire's variadic limitation.
+func ProvideOAuthRefreshAPI(accountRepo AccountRepository, tokenCache GeminiTokenCache) *OAuthRefreshAPI {
+	return NewOAuthRefreshAPI(accountRepo, tokenCache)
+}
+
 // ProvideOpsCleanupService creates and starts OpsCleanupService (cron scheduled).
 func ProvideOpsCleanupService(
 	opsRepo OpsRepository,
@@ -408,7 +413,7 @@ var ProviderSet = wire.NewSet(
 	NewCompositeTokenCacheInvalidator,
 	wire.Bind(new(TokenCacheInvalidator), new(*CompositeTokenCacheInvalidator)),
 	NewAntigravityOAuthService,
-	NewOAuthRefreshAPI,
+	ProvideOAuthRefreshAPI,
 	ProvideGeminiTokenProvider,
 	NewGeminiMessagesCompatService,
 	ProvideAntigravityTokenProvider,

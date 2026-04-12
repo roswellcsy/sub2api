@@ -1711,6 +1711,303 @@
             </div>
           </div>
         </div>
+
+        <div class="card">
+          <div class="border-b border-gray-100 px-6 py-4 dark:border-dark-700">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+              {{ t('admin.settings.apiStation.fingerprintBilling.title') }}
+            </h2>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+              {{ t('admin.settings.apiStation.fingerprintBilling.description') }}
+            </p>
+          </div>
+          <div class="space-y-5 p-6">
+            <div>
+              <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                {{ t('admin.settings.apiStation.fingerprintBilling.billingEntrypoint') }}
+              </label>
+              <input
+                v-model="form.apistation_billing_entrypoint"
+                type="text"
+                class="input max-w-xs font-mono text-sm"
+                :placeholder="t('admin.settings.apiStation.fingerprintBilling.billingEntrypointPlaceholder')"
+              />
+              <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                {{ t('admin.settings.apiStation.fingerprintBilling.billingEntrypointHint') }}
+              </p>
+            </div>
+
+            <div>
+              <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                {{ t('admin.settings.apiStation.fingerprintBilling.fingerprintSalt') }}
+              </label>
+              <input
+                v-model="form.apistation_fingerprint_salt"
+                type="text"
+                class="input max-w-xs font-mono text-sm"
+                :placeholder="t('admin.settings.apiStation.fingerprintBilling.fingerprintSaltPlaceholder')"
+              />
+              <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                {{ t('admin.settings.apiStation.fingerprintBilling.fingerprintSaltHint') }}
+              </p>
+            </div>
+
+            <div>
+              <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                {{ t('admin.settings.apiStation.fingerprintBilling.cliVersion') }}
+              </label>
+              <input
+                v-model="form.apistation_cli_version"
+                type="text"
+                class="input max-w-xs font-mono text-sm"
+                :placeholder="t('admin.settings.apiStation.fingerprintBilling.cliVersionPlaceholder')"
+              />
+              <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                {{ t('admin.settings.apiStation.fingerprintBilling.cliVersionHint') }}
+              </p>
+            </div>
+
+            <div>
+              <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                {{ t('admin.settings.apiStation.fingerprintBilling.latestKnownCliVersion') }}
+              </label>
+              <input
+                v-model="form.apistation_latest_known_cli_version"
+                type="text"
+                class="input max-w-xs font-mono text-sm"
+                :placeholder="t('admin.settings.apiStation.fingerprintBilling.latestKnownCliVersionPlaceholder')"
+              />
+              <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                {{ t('admin.settings.apiStation.fingerprintBilling.latestKnownCliVersionHint') }}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="border-b border-gray-100 px-6 py-4 dark:border-dark-700">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+              {{ t('admin.settings.apiStation.sessionCooldown.title') }}
+            </h2>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+              {{ t('admin.settings.apiStation.sessionCooldown.description') }}
+            </p>
+          </div>
+          <div class="space-y-5 p-6">
+            <div>
+              <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                {{ t('admin.settings.apiStation.sessionCooldown.sessionTtlMin') }}
+              </label>
+              <input
+                v-model.number="form.apistation_session_ttl_min_minutes"
+                type="number"
+                min="1"
+                class="input w-40"
+              />
+              <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                {{ t('admin.settings.apiStation.sessionCooldown.sessionTtlMinHint') }}
+              </p>
+            </div>
+
+            <div>
+              <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                {{ t('admin.settings.apiStation.sessionCooldown.sessionTtlMax') }}
+              </label>
+              <input
+                v-model.number="form.apistation_session_ttl_max_minutes"
+                type="number"
+                min="1"
+                class="input w-40"
+              />
+              <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                {{ t('admin.settings.apiStation.sessionCooldown.sessionTtlMaxHint') }}
+              </p>
+            </div>
+
+            <div>
+              <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                {{ t('admin.settings.apiStation.sessionCooldown.cooldownConfig') }}
+              </label>
+              <textarea
+                v-model="form.apistation_cooldown_config"
+                class="input font-mono text-sm"
+                rows="4"
+                :placeholder="t('admin.settings.apiStation.sessionCooldown.cooldownConfigPlaceholder')"
+              ></textarea>
+              <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                {{ t('admin.settings.apiStation.sessionCooldown.cooldownConfigHint') }}
+              </p>
+            </div>
+
+            <div>
+              <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                {{ t('admin.settings.apiStation.sessionCooldown.auditRetentionDays') }}
+              </label>
+              <input
+                v-model.number="form.apistation_audit_retention_days"
+                type="number"
+                min="1"
+                max="365"
+                class="input w-40"
+              />
+              <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                {{ t('admin.settings.apiStation.sessionCooldown.auditRetentionDaysHint') }}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="border-b border-gray-100 px-6 py-4 dark:border-dark-700">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+              {{ t('admin.settings.apiStation.betaHeaders.title') }}
+            </h2>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+              {{ t('admin.settings.apiStation.betaHeaders.description') }}
+            </p>
+          </div>
+          <div class="space-y-5 p-6">
+            <div>
+              <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                {{ t('admin.settings.apiStation.betaHeaders.oauth') }}
+              </label>
+              <input
+                v-model="form.apistation_beta_header_oauth"
+                type="text"
+                class="input font-mono text-sm"
+              />
+              <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                {{ t('admin.settings.apiStation.betaHeaders.oauthHint') }}
+              </p>
+            </div>
+
+            <div>
+              <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                {{ t('admin.settings.apiStation.betaHeaders.oauthHaiku') }}
+              </label>
+              <input
+                v-model="form.apistation_beta_header_oauth_haiku"
+                type="text"
+                class="input font-mono text-sm"
+              />
+              <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                {{ t('admin.settings.apiStation.betaHeaders.oauthHaikuHint') }}
+              </p>
+            </div>
+
+            <div>
+              <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                {{ t('admin.settings.apiStation.betaHeaders.apikey') }}
+              </label>
+              <input
+                v-model="form.apistation_beta_header_apikey"
+                type="text"
+                class="input font-mono text-sm"
+              />
+              <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                {{ t('admin.settings.apiStation.betaHeaders.apikeyHint') }}
+              </p>
+            </div>
+
+            <div>
+              <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                {{ t('admin.settings.apiStation.betaHeaders.apikeyHaiku') }}
+              </label>
+              <input
+                v-model="form.apistation_beta_header_apikey_haiku"
+                type="text"
+                class="input font-mono text-sm"
+              />
+              <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                {{ t('admin.settings.apiStation.betaHeaders.apikeyHaikuHint') }}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="border-b border-gray-100 px-6 py-4 dark:border-dark-700">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+              {{ t('admin.settings.apiStation.monitoring.title') }}
+            </h2>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+              {{ t('admin.settings.apiStation.monitoring.description') }}
+            </p>
+          </div>
+          <div class="space-y-5 p-6">
+            <div class="flex items-center justify-between">
+              <div>
+                <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  {{ t('admin.settings.apiStation.monitoring.sensitiveWordsEnabled') }}
+                </label>
+                <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+                  {{ t('admin.settings.apiStation.monitoring.sensitiveWordsEnabledHint') }}
+                </p>
+              </div>
+              <Toggle v-model="form.apistation_sensitive_words_enabled" />
+            </div>
+
+            <div>
+              <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                {{ t('admin.settings.apiStation.monitoring.sensitiveWordsList') }}
+              </label>
+              <textarea
+                v-model="form.apistation_sensitive_words_list"
+                class="input font-mono text-sm"
+                rows="3"
+                :placeholder="t('admin.settings.apiStation.monitoring.sensitiveWordsListPlaceholder')"
+              ></textarea>
+              <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                {{ t('admin.settings.apiStation.monitoring.sensitiveWordsListHint') }}
+              </p>
+            </div>
+
+            <div>
+              <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                {{ t('admin.settings.apiStation.monitoring.feishuWebhookUrl') }}
+              </label>
+              <input
+                v-model="form.apistation_feishu_webhook_url"
+                type="text"
+                class="input font-mono text-sm"
+                :placeholder="t('admin.settings.apiStation.monitoring.feishuWebhookUrlPlaceholder')"
+              />
+              <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                {{ t('admin.settings.apiStation.monitoring.feishuWebhookUrlHint') }}
+              </p>
+            </div>
+
+            <div>
+              <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                {{ t('admin.settings.apiStation.monitoring.monitorCheckInterval') }}
+              </label>
+              <input
+                v-model.number="form.apistation_monitor_check_interval"
+                type="number"
+                min="60"
+                class="input w-40"
+              />
+              <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                {{ t('admin.settings.apiStation.monitoring.monitorCheckIntervalHint') }}
+              </p>
+            </div>
+
+            <div>
+              <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                {{ t('admin.settings.apiStation.monitoring.banAlertThreshold') }}
+              </label>
+              <input
+                v-model.number="form.apistation_ban_alert_threshold"
+                type="number"
+                min="1"
+                class="input w-40"
+              />
+              <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                {{ t('admin.settings.apiStation.monitoring.banAlertThresholdHint') }}
+              </p>
+            </div>
+          </div>
+        </div>
         </div><!-- /Tab: Gateway — Claude Code, Scheduling -->
 
         <!-- Tab: General -->

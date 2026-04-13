@@ -1,3 +1,5 @@
+> Merged by upstream via PR #1591 (commit 9648c432) on 2026-04-13 — fork marker patch removed during merge
+>
 > **Submitted**: 2026-04-12 · PR: https://github.com/Wei-Shaw/sub2api/pull/1591
 
 # Upstream PR Draft: Strict Cast in API Client

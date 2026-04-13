@@ -25,6 +25,7 @@
 | 日期 | upstream 新 commits | 冲突文件数 | 冲突行数 | 解决耗时 | 主要冲突点 | 备注 |
 |---|---|---|---|---|---|---|
 | 2026-04-12 | 0 | 0 | 0 | 0m | 无冲突（upstream tip 未前进） | Baseline：fork 14 commits 全为 api-station Phase 1-3+ADR，merge-base 97f14b7a；gateway_service.go +50/-9（2 个 hook 点 Forward() line 4074/4476） |
+| 2026-04-13 | 36 | 1 | ~5 | 10m | client.ts (TS2352 marker 清理) | Upstream 合入我们 PR #1591；migration 097 将在下次部署时自动应用 |
 
 ## 阈值告警规则
 

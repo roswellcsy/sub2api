@@ -40,12 +40,12 @@ echo "image retagged"
 if [ ${WITH_DB} -eq 1 ]; then
   LATEST_BACKUP=\$(ls -t /backups/sub2api-*.sql.gz | head -1)
   echo "Stopping sub2api for DB restore..."
-  docker compose -f docker-compose.local.yml -f docker-compose.override.yml stop sub2api
+  docker compose -f docker-compose.local.yml -f prod/docker-compose.override.yml stop sub2api
   echo "Restoring from \$LATEST_BACKUP"
   gunzip -c "\$LATEST_BACKUP" | docker exec -i sub2api-postgres psql -U sub2api sub2api
 fi
 
-docker compose -f docker-compose.local.yml -f docker-compose.override.yml up -d --force-recreate sub2api
+docker compose -f docker-compose.local.yml -f prod/docker-compose.override.yml up -d --force-recreate sub2api
 REMOTE
 
 sleep 15

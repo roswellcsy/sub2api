@@ -40,7 +40,7 @@ echo "==> Pushing to origin"
 git push origin main
 
 echo "==> Packaging dist"
-tar czf /tmp/dist-${DOMAIN}.tar.gz -C backend/internal/web dist
+COPYFILE_DISABLE=1 tar --no-xattrs -czf /tmp/dist-${DOMAIN}.tar.gz -C backend/internal/web dist
 
 if [ "$SKIP_BACKUP" -eq 0 ]; then
   echo "==> VPS: pre-upgrade backup + rollback tag"
@@ -68,7 +68,7 @@ git pull --ff-only
 tar xzf /tmp/dist-${DOMAIN}.tar.gz -C backend/internal/web/
 docker build -t weishaw/sub2api:latest -f deploy/prod/Dockerfile.prebuilt . 2>&1 | tail -10
 cd deploy
-docker compose -f docker-compose.local.yml -f docker-compose.override.yml up -d
+docker compose -f docker-compose.local.yml -f prod/docker-compose.override.yml up -d
 REMOTE
 
 echo "==> Waiting for healthy (up to 90s)"
@@ -81,5 +81,5 @@ for i in \$(seq 1 18); do
   sleep 5
 done
 echo "ERROR: health check failed after 90s" >&2
-ssh "$SUB2API_REMOTE" "cd ${WORKDIR}/deploy && docker compose -f docker-compose.local.yml -f docker-compose.override.yml logs --tail 40 sub2api"
+ssh "$SUB2API_REMOTE" "cd ${WORKDIR}/deploy && docker compose -f docker-compose.local.yml -f prod/docker-compose.override.yml logs --tail 40 sub2api"
 exit 1

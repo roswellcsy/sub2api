@@ -72,7 +72,7 @@ docker compose -f docker-compose.local.yml -f prod/docker-compose.override.yml u
 REMOTE
 
 echo "==> Waiting for healthy (up to 90s)"
-for i in \$(seq 1 18); do
+for i in $(seq 1 18); do
   if curl -fsS --max-time 5 https://${DOMAIN}/health > /dev/null 2>&1; then
     echo "OK @ ${i}"
     curl -sS https://${DOMAIN}/health

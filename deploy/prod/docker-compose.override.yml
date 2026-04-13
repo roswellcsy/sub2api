@@ -1,0 +1,46 @@
+# Override for 1c1g VPS deployment — memory caps + log rotation + curl healthcheck
+# Usage: docker compose -f docker-compose.local.yml -f docker-compose.override.yml up -d
+
+services:
+  sub2api:
+    mem_limit: 384m
+    memswap_limit: 768m
+    logging:
+      driver: json-file
+      options:
+        max-size: "50m"
+        max-file: "3"
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "--max-time", "5", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+  postgres:
+    mem_limit: 256m
+    memswap_limit: 512m
+    logging:
+      driver: json-file
+      options:
+        max-size: "50m"
+        max-file: "3"
+    command:
+      - postgres
+      - -c
+      - shared_buffers=64MB
+      - -c
+      - max_connections=50
+      - -c
+      - work_mem=4MB
+      - -c
+      - effective_cache_size=128MB
+  redis:
+    mem_limit: 96m
+    memswap_limit: 192m
+    logging:
+      driver: json-file
+      options:
+        max-size: "50m"
+        max-file: "3"
+    command: >
+      sh -c 'redis-server --maxmemory 64mb --maxmemory-policy allkeys-lru --save 60 1 --appendonly yes --appendfsync everysec ${REDIS_PASSWORD:+--requirepass "$REDIS_PASSWORD"}'

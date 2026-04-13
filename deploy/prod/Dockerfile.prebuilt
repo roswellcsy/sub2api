@@ -1,0 +1,74 @@
+# Dockerfile.prebuilt — skip frontend build stage, use pre-built dist from host
+#
+# Reason: low-memory VPS (1c1g) cannot handle vue-tsc+vite build (V8 heap abort).
+# Host runs `pnpm run build` producing `backend/internal/web/dist/`, rsync to VPS,
+# then Go -tags embed picks it up at compile time.
+#
+# Usage:
+#   1. On dev host: cd frontend && pnpm run build   (outputs to ../backend/internal/web/dist/)
+#   2. Sync dist to VPS target at same relative path
+#   3. On VPS: docker build -t weishaw/sub2api:latest -f deploy/prod/Dockerfile.prebuilt .
+
+ARG GOLANG_IMAGE=golang:1.26.2-alpine
+ARG ALPINE_IMAGE=alpine:3.20
+ARG GOPROXY=https://goproxy.cn,direct
+ARG GOSUMDB=sum.golang.google.cn
+
+# -----------------------------------------------------------------------------
+# Stage 1: Backend Builder (no frontend stage)
+# -----------------------------------------------------------------------------
+FROM ${GOLANG_IMAGE} AS backend-builder
+ARG VERSION=docker
+ARG COMMIT=docker
+ARG DATE
+ARG GOPROXY
+ARG GOSUMDB
+
+ENV GOPROXY=${GOPROXY}
+ENV GOSUMDB=${GOSUMDB}
+
+RUN apk add --no-cache git ca-certificates tzdata
+
+WORKDIR /app/backend
+
+COPY backend/go.mod backend/go.sum ./
+RUN go mod download
+
+COPY backend/ ./
+
+# Verify pre-built frontend dist is present before Go build
+RUN test -f /app/backend/internal/web/dist/index.html \
+    || (echo "ERROR: frontend dist missing. Run 'pnpm run build' on dev host first." && exit 1)
+
+RUN CGO_ENABLED=0 GOOS=linux go build \
+    -tags embed \
+    -ldflags="-s -w -X main.Commit=${COMMIT} -X main.Date=${DATE:-$(date -u +%Y-%m-%dT%H:%M:%SZ)} -X main.BuildType=release" \
+    -o /app/sub2api \
+    ./cmd/server
+
+# -----------------------------------------------------------------------------
+# Stage 2: Final Runtime Image
+# -----------------------------------------------------------------------------
+FROM ${ALPINE_IMAGE}
+
+LABEL maintainer="zen-codes api-station fork"
+LABEL description="Sub2API Gateway — prebuilt frontend variant"
+
+RUN apk add --no-cache ca-certificates tzdata curl su-exec && rm -rf /var/cache/apk/*
+RUN addgroup -g 1000 sub2api && adduser -u 1000 -G sub2api -s /bin/sh -D sub2api
+
+WORKDIR /app
+
+COPY --from=backend-builder /app/sub2api /app/sub2api
+RUN mkdir -p /app/data && chown -R sub2api:sub2api /app
+
+COPY deploy/docker-entrypoint.sh /app/docker-entrypoint.sh
+RUN chmod +x /app/docker-entrypoint.sh
+
+EXPOSE 8080
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
+    CMD curl -fsS --max-time 5 http://localhost:${SERVER_PORT:-8080}/health || exit 1
+
+ENTRYPOINT ["/app/docker-entrypoint.sh"]
+CMD ["/app/sub2api"]

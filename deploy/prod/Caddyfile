@@ -1,0 +1,18 @@
+# Caddyfile for zen-codes.com production
+# Replace __DOMAIN__ when deploying new instance
+# Install: sudo cp deploy/prod/Caddyfile /etc/caddy/Caddyfile && sudo systemctl restart caddy
+
+__DOMAIN__, www.__DOMAIN__ {
+    encode gzip
+    reverse_proxy 127.0.0.1:18080 {
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+        header_up X-Forwarded-Proto https
+    }
+    log {
+        output file /var/log/caddy/__DOMAIN__-access.log {
+            roll_size 100mb
+            roll_keep 5
+        }
+    }
+}
